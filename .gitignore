@@ -1,0 +1,12 @@
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+**/terraform.tfstate*
+**/crash.log
+**/override.tf*
+**/*.tfvars*
+
+# Certs / secrets
+**/letsencrypt/
+**/acme.json
+**/env/**
