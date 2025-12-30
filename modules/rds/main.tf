@@ -7,14 +7,6 @@ resource "aws_security_group" "db" {
   description = "Database access"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Postgres from VPC/app"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = local.ingress_cidrs
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -23,12 +15,51 @@ resource "aws_security_group" "db" {
   }
 }
 
+# Allow from CIDRs only when allowed_sg_ids is empty (initial apply)
+resource "aws_security_group_rule" "db_ingress_cidr" {
+  count             = length(var.allowed_sg_ids) == 0 ? 1 : 0
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  security_group_id = aws_security_group.db.id
+  cidr_blocks       = local.ingress_cidrs
+  description       = "Postgres from VPC"
+}
+
+# Allow from specific app SGs (safer, use on second apply to avoid TF cycle)
+resource "aws_security_group_rule" "db_ingress_sg" {
+  for_each                 = toset(var.allowed_sg_ids)
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.db.id
+  source_security_group_id = each.value
+  description              = "Postgres from App SG"
+}
+
 resource "aws_db_subnet_group" "this" {
   name       = "${var.name}-db-subnets"
   subnet_ids = var.subnet_ids
 
   tags = {
     Name = "${var.name}-db-subnets"
+  }
+}
+
+resource "aws_db_parameter_group" "this" {
+  name   = "${var.name}-pg"
+  family = var.parameter_group_family
+
+  parameter {
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot"
+  }
+
+  tags = {
+    Name = "${var.name}-pg"
   }
 }
 
@@ -43,6 +74,7 @@ resource "aws_db_instance" "this" {
   password                   = var.db_password
   port                       = 5432
   db_subnet_group_name       = aws_db_subnet_group.this.name
+  parameter_group_name       = aws_db_parameter_group.this.name
   vpc_security_group_ids     = [aws_security_group.db.id]
   multi_az                   = var.multi_az
   publicly_accessible        = var.publicly_accessible

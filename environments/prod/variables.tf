@@ -15,7 +15,7 @@ variable "vpc_cidr" {
 
 variable "public_subnet_cidrs" {
   type    = list(string)
-  default = ["10.0.101.0/24"]
+  default = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 
 variable "private_subnet_cidrs" {
@@ -80,4 +80,63 @@ variable "media_bucket_name" {
 variable "s3_force_destroy" {
   type    = bool
   default = false
+}
+
+# App/EC2 variables
+variable "instance_type" {
+  type    = string
+  default = "t3.small"
+}
+
+variable "enable_ssh" {
+  type    = bool
+  default = false
+}
+
+variable "ssh_cidr" {
+  type    = string
+  default = ""
+}
+
+variable "key_name" {
+  type    = string
+  default = ""
+}
+
+variable "app_domain" {
+  type    = string
+  default = "salao.andrepombo.info"
+}
+
+variable "acme_email" {
+  type    = string
+  default = "you@example.com"
+}
+
+variable "backend_image" {
+  type = string
+}
+
+variable "frontend_image" {
+  type = string
+}
+
+variable "use_ecr" {
+  type    = bool
+  default = false
+}
+
+variable "expose_dashboard" {
+  type    = bool
+  default = false
+}
+
+variable "dashboard_domain" {
+  type    = string
+  default = ""
+}
+
+variable "basic_auth_hash" {
+  type    = string
+  default = ""
 }

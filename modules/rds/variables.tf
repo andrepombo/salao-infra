@@ -34,6 +34,12 @@ variable "engine_version" {
   default = "15.5"
 }
 
+variable "parameter_group_family" {
+  type    = string
+  # Keep aligned with engine major version (e.g., postgres13, postgres14, postgres15)
+  default = "postgres15"
+}
+
 variable "instance_class" {
   type    = string
   default = "db.t3.micro"
@@ -70,6 +76,11 @@ variable "backup_retention_period" {
 }
 
 variable "allowed_cidr_blocks" {
+  type    = list(string)
+  default = []
+}
+
+variable "allowed_sg_ids" {
   type    = list(string)
   default = []
 }

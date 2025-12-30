@@ -62,3 +62,14 @@ resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
+
+# Shared SG identity used to allow DB access only from app instances
+resource "aws_security_group" "app_access" {
+  name        = "${var.name}-app-access"
+  description = "App access identity for DB allow rules"
+  vpc_id      = aws_vpc.this.id
+
+  tags = {
+    Name = "${var.name}-app-access"
+  }
+}
