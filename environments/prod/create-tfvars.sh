@@ -11,7 +11,7 @@ ACME_EMAIL=${ACME_EMAIL:-you@example.com}
 MYIP=$(curl -fsSL https://checkip.amazonaws.com || echo "0.0.0.0")
 
 # Random suffix for unique bucket name
-SUFFIX=$(tr -dc 'a-z0-9' </dev/urandom | head -c 6)
+SUFFIX=$(openssl rand -hex 3)
 BUCKET=${BUCKET:-"salao-andrepombo-media-${SUFFIX}"}
 
 # Images (set your own)
