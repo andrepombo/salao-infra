@@ -13,12 +13,9 @@ runcmd:
 
     # Install Docker
     if ! command -v docker >/dev/null 2>&1; then
-      install -m 0755 -d /etc/apt/keyrings
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-      chmod a+r /etc/apt/keyrings/docker.gpg
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
       apt-get update -y
-      apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      apt-get install -y docker.io docker-compose
+      systemctl enable --now docker
       usermod -aG docker ubuntu || true
     fi
 
@@ -30,6 +27,7 @@ runcmd:
 
     mkdir -p /opt/traefik/data
     mkdir -p /opt/app
+    mkdir -p /opt/portainer/data
 
     cat >/opt/app/docker-compose.yml <<'COMPOSE'
     version: "3.8"
@@ -78,6 +76,16 @@ runcmd:
           - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
           - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
+      portainer:
+        image: portainer/portainer-ce:latest
+        container_name: portainer
+        restart: unless-stopped
+        ports:
+          - "9000:9000"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /opt/portainer/data:/data
+
       frontend:
         image: ${frontend_image}
         container_name: frontend
@@ -90,4 +98,4 @@ runcmd:
           - "traefik.http.services.frontend.loadbalancer.server.port=80"
     COMPOSE
 
-    docker compose -f /opt/app/docker-compose.yml up -d
+    docker-compose -f /opt/app/docker-compose.yml up -d

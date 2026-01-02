@@ -54,6 +54,16 @@ resource "aws_security_group_rule" "https" {
   description       = "HTTPS"
 }
 
+resource "aws_security_group_rule" "portainer" {
+  type              = "ingress"
+  from_port         = 9000
+  to_port           = 9000
+  protocol          = "tcp"
+  security_group_id = aws_security_group.app.id
+  cidr_blocks       = [var.ssh_cidr]
+  description       = "Portainer UI"
+}
+
 resource "aws_iam_role" "ec2" {
   name = "${var.name}-ec2-role"
   assume_role_policy = jsonencode({
@@ -78,7 +88,10 @@ resource "aws_iam_role_policy_attachment" "ecr_ro" {
 }
 
 resource "aws_iam_policy" "s3_rw" {
-  count  = var.s3_rw_access && var.media_bucket_name != "" ? 1 : 0
+  # Only controlled by the explicit flag; the bucket name itself may be an
+  # unknown during planning (coming from another module), which cannot be used
+  # in a count expression.
+  count  = var.s3_rw_access ? 1 : 0
   name   = "${var.name}-s3-rw"
   policy = jsonencode({
     Version = "2012-10-17",
@@ -94,7 +107,7 @@ resource "aws_iam_policy" "s3_rw" {
 }
 
 resource "aws_iam_role_policy_attachment" "s3_rw" {
-  count      = var.s3_rw_access && var.media_bucket_name != "" ? 1 : 0
+  count      = var.s3_rw_access ? 1 : 0
   role       = aws_iam_role.ec2.name
   policy_arn = aws_iam_policy.s3_rw[0].arn
 }
