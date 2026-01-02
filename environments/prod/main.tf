@@ -18,6 +18,7 @@ module "db" {
   db_username                  = var.db_username
   db_password                  = var.db_password
   engine_version               = var.db_engine_version
+  parameter_group_family       = "postgres17"
   instance_class               = var.db_instance_class
   allocated_storage            = var.db_allocated_storage
   multi_az                     = var.db_multi_az
