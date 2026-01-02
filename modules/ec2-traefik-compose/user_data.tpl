@@ -9,9 +9,10 @@ packages:
   - lsb-release
 runcmd:
   - |
-    set -euo pipefail
+    # Use a POSIX-compatible set; /bin/sh in cloud-init does not support -o pipefail
+    set -eu
 
-    # Install Docker
+    # Install Docker from Ubuntu repos (version compatible with Traefik's Docker client)
     if ! command -v docker >/dev/null 2>&1; then
       apt-get update -y
       apt-get install -y docker.io docker-compose
