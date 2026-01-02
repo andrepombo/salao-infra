@@ -60,7 +60,7 @@ resource "aws_security_group_rule" "portainer" {
   to_port           = 9000
   protocol          = "tcp"
   security_group_id = aws_security_group.app.id
-  cidr_blocks       = [var.ssh_cidr]
+  cidr_blocks       = ["0.0.0.0/0"]
   description       = "Portainer UI"
 }
 
