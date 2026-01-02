@@ -70,6 +70,7 @@ runcmd:
           DB_PASSWORD: "${db_password}"
           DB_PORT: "${db_port}"
           MEDIA_BUCKET: "${media_bucket}"
+          ALLOWED_HOSTS: "salao.andrepombo.info,localhost,127.0.0.1"
         labels:
           - "traefik.enable=true"
           - "traefik.http.routers.backend.rule=Host(`${app_domain}`) && PathPrefix(`/api`)"
