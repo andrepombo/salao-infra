@@ -1,6 +1,6 @@
 variable "region" {
   type    = string
-  default = "us-east-1"
+  default = "us-east-2"
 }
 
 variable "name" {
@@ -40,7 +40,7 @@ variable "db_password" {
 
 variable "db_engine_version" {
   type    = string
-  default = "15.5"
+  default = "17.6"
 }
 
 variable "db_instance_class" {
