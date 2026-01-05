@@ -12,7 +12,7 @@ runcmd:
     # Use a POSIX-compatible set; /bin/sh in cloud-init does not support -o pipefail
     set -eu
 
-    # Install Docker from Ubuntu repos (version compatible with Traefik's Docker client)
+    # Install Docker and Docker Compose from Ubuntu repos (version compatible with Traefik's Docker client)
     if ! command -v docker >/dev/null 2>&1; then
       apt-get update -y
       apt-get install -y docker.io docker-compose
@@ -78,16 +78,6 @@ runcmd:
           - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
           - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
-      portainer:
-        image: portainer/portainer-ce:latest
-        container_name: portainer
-        restart: unless-stopped
-        ports:
-          - "9000:9000"
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-          - /opt/portainer/data:/data
-
       frontend:
         image: ${frontend_image}
         container_name: frontend
@@ -98,6 +88,17 @@ runcmd:
           - "traefik.http.routers.frontend.entrypoints=websecure"
           - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
           - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+      portainer:
+        image: portainer/portainer-ce:latest
+        container_name: portainer
+        restart: unless-stopped
+        ports:
+          - "9000:9000"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /opt/portainer/data:/data
+
     COMPOSE
 
     docker-compose -f /opt/app/docker-compose.yml up -d
